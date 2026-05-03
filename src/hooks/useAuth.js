@@ -3,7 +3,7 @@ const SALT = 'rendimientos-2026'
 
 async function hashPin(pin) {
   const encoded = new TextEncoder().encode(pin + SALT)
-  const buffer = await crypto.subtle.digest('SHA-256', encoded)
+  const buffer = await globalThis.crypto.subtle.digest('SHA-256', encoded)
   return Array.from(new Uint8Array(buffer))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
