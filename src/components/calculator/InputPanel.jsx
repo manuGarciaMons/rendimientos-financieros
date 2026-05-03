@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   PlusCircle, Trash2, TrendingUp, Calendar, DollarSign, Percent,
   BarChart2, Lock, Download, Upload, ClipboardList,
@@ -6,9 +6,26 @@ import {
 import { SliderInput, NumberInput } from '@/components/ui/SliderInput'
 import { cn } from '@/lib/utils'
 
+function getCurrentMes(fechaInicio, plazoMeses) {
+  const [startYear, startMonth] = fechaInicio.split('-').map(Number)
+  const now = new Date()
+  const mes = (now.getFullYear() - startYear) * 12 + (now.getMonth() + 1 - startMonth) + 1
+  return Math.min(Math.max(1, mes), plazoMeses)
+}
+
 export function InputPanel({ params, onChange, onResultados, aportes, onAportesChange, onLock, onExport, onImport }) {
   const [nuevoAbono, setNuevoAbono] = useState({ mes: 1, monto: 1000 })
   const [nuevoAporte, setNuevoAporte] = useState({ mes: 1, monto: 0, nota: '' })
+
+  // Auto-avanzar el mes actual cuando cambia la fecha de inicio
+  useEffect(() => {
+    if (params.fechaInicio) {
+      const mes = getCurrentMes(params.fechaInicio, params.plazoMeses)
+      setNuevoAporte(prev => ({ ...prev, mes }))
+    }
+  }, [params.fechaInicio, params.plazoMeses])
+
+  const currentMes = params.fechaInicio ? getCurrentMes(params.fechaInicio, params.plazoMeses) : null
 
   function addAbonoUnico() {
     if (!nuevoAbono.monto || nuevoAbono.mes < 1 || nuevoAbono.mes > params.plazoMeses) return
@@ -232,15 +249,20 @@ export function InputPanel({ params, onChange, onResultados, aportes, onAportesC
           </p>
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              <NumberInput
-                id="aporte-mes"
-                label="Mes"
-                value={nuevoAporte.mes}
-                onChange={(v) => setNuevoAporte((p) => ({ ...p, mes: Math.round(v) }))}
-                min={1}
-                max={params.plazoMeses}
-                step={1}
-              />
+              <div>
+                <NumberInput
+                  id="aporte-mes"
+                  label="Mes"
+                  value={nuevoAporte.mes}
+                  onChange={(v) => setNuevoAporte((p) => ({ ...p, mes: Math.round(v) }))}
+                  min={1}
+                  max={params.plazoMeses}
+                  step={1}
+                />
+                {currentMes && nuevoAporte.mes === currentMes && (
+                  <p className="text-[10px] text-emerald-500/70 mt-1 pl-1">● Mes actual</p>
+                )}
+              </div>
               <NumberInput
                 id="aporte-monto"
                 label="Monto"

@@ -128,7 +128,7 @@ export default function App() {
               <h2 className="text-sm font-semibold text-slate-200">Crecimiento del capital</h2>
               <span className="text-xs text-slate-500 hidden sm:block">Interés compuesto mensual</span>
             </div>
-            <GrowthChart rows={rows} />
+            <GrowthChart rows={rows} fechaInicio={params.fechaInicio} />
           </section>
 
           <BreakdownTable rows={rows} fechaInicio={params.fechaInicio} />

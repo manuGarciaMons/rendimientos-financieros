@@ -7,10 +7,12 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  ReferenceLine,
+  ReferenceArea,
 } from 'recharts'
 import { formatCurrency } from '@/lib/utils'
 
-function CustomTooltip({ active, payload, label }) {
+function CustomTooltip({ active, payload, label, currentMes }) {
   if (!active || !payload?.length) return null
 
   const order = ['Balance', 'Intereses acum.', 'Interés del mes']
@@ -18,9 +20,19 @@ function CustomTooltip({ active, payload, label }) {
     (a, b) => order.indexOf(a.name) - order.indexOf(b.name)
   )
 
+  const esFuturo = currentMes && label > currentMes
+
   return (
     <div className="bg-slate-800 border border-slate-700 rounded-xl p-3 shadow-xl text-xs min-w-[200px]">
-      <p className="text-slate-400 font-medium mb-2">Mes {label}</p>
+      <div className="flex items-center gap-2 mb-2">
+        <p className="text-slate-400 font-medium">Mes {label}</p>
+        {esFuturo
+          ? <span className="text-[10px] text-slate-600 bg-slate-700/60 px-1.5 py-0.5 rounded-full">proyectado</span>
+          : currentMes
+            ? <span className="text-[10px] text-emerald-500/70 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">real</span>
+            : null
+        }
+      </div>
       {sorted.map((entry) => (
         <div key={entry.dataKey} className="flex items-center justify-between gap-4 py-0.5">
           <span className="flex items-center gap-1.5">
@@ -36,13 +48,21 @@ function CustomTooltip({ active, payload, label }) {
   )
 }
 
-export function GrowthChart({ rows }) {
+export function GrowthChart({ rows, fechaInicio }) {
   const data = rows.map((r) => ({
     mes: r.mes,
     'Balance': r.balance,
     'Intereses acum.': r.totalInteresesAcumulados,
     'Interés del mes': r.interes,
   }))
+
+  const currentMes = (() => {
+    if (!fechaInicio || !rows.length) return null
+    const [startYear, startMonth] = fechaInicio.split('-').map(Number)
+    const now = new Date()
+    const mes = (now.getFullYear() - startYear) * 12 + (now.getMonth() + 1 - startMonth) + 1
+    return Math.min(Math.max(1, mes), rows.length)
+  })()
 
   const leftFormatter = (v) => {
     if (v >= 1_000_000_000) return `$${(v / 1_000_000_000).toFixed(1)}B`
@@ -105,12 +125,36 @@ export function GrowthChart({ rows }) {
             width={56}
           />
 
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={(props) => <CustomTooltip {...props} currentMes={currentMes} />} />
           <Legend
             wrapperStyle={{ fontSize: '12px', color: '#94a3b8', paddingTop: '8px' }}
             iconType="circle"
             iconSize={8}
           />
+
+          {/* Zona de proyección futura */}
+          {currentMes && currentMes < rows.length && (
+            <ReferenceArea
+              yAxisId="left"
+              x1={currentMes}
+              x2={rows[rows.length - 1].mes}
+              fill="#0f172a"
+              fillOpacity={0.55}
+              strokeOpacity={0}
+            />
+          )}
+
+          {/* Línea "Hoy" */}
+          {currentMes && (
+            <ReferenceLine
+              yAxisId="left"
+              x={currentMes}
+              stroke="#475569"
+              strokeDasharray="4 3"
+              strokeWidth={1.5}
+              label={{ value: 'Hoy', position: 'insideTopRight', fill: '#64748b', fontSize: 10, dy: -4 }}
+            />
+          )}
 
           <Area
             yAxisId="left"
