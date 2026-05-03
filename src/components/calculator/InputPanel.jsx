@@ -175,6 +175,27 @@ export function InputPanel({ params, onChange, onResultados, aportes, onAportesC
             suffix=" meses"
             formatDisplay={(v) => `${v} ${v === 1 ? 'mes' : 'meses'}`}
           />
+          <div className="space-y-1.5">
+            <label htmlFor="fecha-inicio" className="block text-xs font-medium text-slate-400">
+              Fecha de inicio <span className="text-slate-600">(opcional)</span>
+            </label>
+            <input
+              id="fecha-inicio"
+              type="date"
+              value={params.fechaInicio || ''}
+              onChange={(e) => onChange('fechaInicio', e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/60 transition-colors [color-scheme:dark]"
+            />
+            {params.fechaInicio && (
+              <button
+                type="button"
+                onClick={() => onChange('fechaInicio', '')}
+                className="text-xs text-slate-600 hover:text-slate-400 transition-colors"
+              >
+                Quitar fecha
+              </button>
+            )}
+          </div>
         </Section>
 
         {/* Abono mensual proyectado */}

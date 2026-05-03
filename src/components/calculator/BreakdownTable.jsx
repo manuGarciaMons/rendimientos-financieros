@@ -5,6 +5,13 @@ import { cn } from '@/lib/utils'
 
 const PAGE_SIZE = 12
 
+function getMesLabel(mes, fechaInicio) {
+  if (!fechaInicio) return mes
+  const [year, month] = fechaInicio.split('-').map(Number)
+  const date = new Date(year, month - 1 + (mes - 1), 1)
+  return date.toLocaleDateString('es-CO', { month: 'short', year: '2-digit' })
+}
+
 // Columnas: mobile muestra solo Mes, Interés, Balance
 const COLS = [
   { key: 'mes',        label: 'Mes',          mobileHide: false },
@@ -15,7 +22,7 @@ const COLS = [
   { key: 'acum',       label: 'Interés acum.', mobileHide: true  },
 ]
 
-export function BreakdownTable({ rows }) {
+export function BreakdownTable({ rows, fechaInicio }) {
   const [expanded, setExpanded] = useState(true)
   const [page, setPage] = useState(0)
 
@@ -67,7 +74,10 @@ export function BreakdownTable({ rows }) {
                     )}
                   >
                     <td className="px-3 lg:px-4 py-2 lg:py-2.5 font-medium text-slate-400">
-                      {row.mes}
+                      {fechaInicio ? (
+                        <span className="hidden sm:block capitalize">{getMesLabel(row.mes, fechaInicio)}</span>
+                      ) : null}
+                      <span className={cn('tabular-nums', fechaInicio && 'sm:hidden')}>{row.mes}</span>
                     </td>
                     <td className="px-3 lg:px-4 py-2 lg:py-2.5 tabular-nums hidden sm:table-cell">
                       {row.abonoMensual > 0 ? (

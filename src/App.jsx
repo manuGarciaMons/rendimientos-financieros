@@ -16,6 +16,7 @@ const DEFAULT_PARAMS = {
   plazoMeses: 24,
   abonoMensual: 500000,
   abonosUnicos: [],
+  fechaInicio: '',
 }
 
 function loadParams() {
@@ -130,7 +131,7 @@ export default function App() {
             <GrowthChart rows={rows} />
           </section>
 
-          <BreakdownTable rows={rows} />
+          <BreakdownTable rows={rows} fechaInicio={params.fechaInicio} />
 
           <p className="text-center text-xs text-slate-600 pb-2">
             Los cálculos son aproximados y no constituyen asesoría financiera.
